@@ -22,6 +22,6 @@
 	<ItemGroup>
 	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	  <PackageReference Include="Skyline.DataMiner.Utils.InteractiveAutomationScriptToolkit" Version="6.1.0" />
-	  <PackageReference Include="SLC.CLib.Linux" Version="1.0.0-opensearch.dev.17" />
+	  <PackageReference Include="Skyline.DataMiner.Utils.Linux" Version="1.0.2" />
 	</ItemGroup>
 </Project>

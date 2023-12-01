@@ -6,8 +6,6 @@
     using Renci.SshNet;
     using Renci.SshNet.Common;
     using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.CommunityLibrary.Linux;
-    using Skyline.DataMiner.CommunityLibrary.Linux.Communication;
     using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
     public class SelectServerController
@@ -35,6 +33,8 @@
         {
             selectServerView.InitializeScreen();
             selectServerView.NextButton.IsEnabled = false;
+
+            PrefillServer(selectServerView, model);
         }
 
         public void EmptyView()
@@ -68,6 +68,11 @@
                 // Network Check
                 try
                 {
+                    if (model.IsOffline)
+                    {
+						selectServerView.FeedbackConnection.Text += Environment.NewLine + "Network unavailable, proceeding with offline setup.";
+					}
+
                     var networkCheckResult = linux.Connection.RunCommand($"timeout 0.2 ping -c 1 8.8.8.8 >/dev/null 2>&1 ; echo $?");
                     if (networkCheckResult == "0")
                     {
@@ -78,7 +83,7 @@
                     else
                     {
                         model.IsOffline = true;
-                        selectServerView.FeedbackConnection.Text += Environment.NewLine + "Network unavailable, NTP setup currently requires online capability.";
+                        selectServerView.FeedbackConnection.Text += Environment.NewLine + "Network unavailable, proceeding with offline setup.";
                     }
                 }
                 catch (Exception ex)
@@ -103,6 +108,13 @@
         private void OnNextButtonPressed(object sender, EventArgs e)
         {
             Next?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void PrefillServer(SelectServerView view, NTPSetupModel model)
+        {
+            view.Ipaddress.Text = model.Host;
+            view.User.Text = model.Username;
+            view.Password.Password = model.Password;
         }
     }
 }

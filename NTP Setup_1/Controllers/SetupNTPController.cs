@@ -9,9 +9,6 @@
     using Renci.SshNet;
     using Renci.SshNet.Common;
     using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.CommunityLibrary.Linux;
-    using Skyline.DataMiner.CommunityLibrary.Linux.Actions.ActionSteps;
-    using Skyline.DataMiner.CommunityLibrary.Linux.Communication;
     using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
     public class SetupNTPController

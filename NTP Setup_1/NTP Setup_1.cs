@@ -10,7 +10,6 @@ namespace NTP_Setup_1
     using NTP_Setup_1.Steps;
     using NTP_Setup_1.Views;
     using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.CommunityLibrary.Linux.Actions.ActionSteps;
     using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
@@ -35,11 +34,6 @@ namespace NTP_Setup_1
             string input = engine.GetScriptParam("Input").Value;
             var model = JsonConvert.DeserializeObject<NTPSetupModel>(input);
 
-            if (model.AsHost == null)
-            {
-                throw new Exception("Invalid input parameters. Please ensure that asHost field is filled in.");
-            }
-
             try
             {
                 if (model.IsSilent)
@@ -50,10 +44,19 @@ namespace NTP_Setup_1
                 SelectServerView selectServerView = new SelectServerView(engine);
                 SelectServerController selectServerController = new SelectServerController(engine, selectServerView, model);
 
+                ConfigureNTPView configureNTPView = new ConfigureNTPView(engine);
+                ConfigureNTPController configureNTPController = new ConfigureNTPController(engine, configureNTPView, model);
+
                 SetupNTPView setupNTPView = new SetupNTPView(engine);
                 SetupNTPController setupNFSController = new SetupNTPController(engine, setupNTPView, model);
 
                 selectServerController.Next += (sender, args) =>
+                {
+					configureNTPController.Initialize();
+					controller.ShowDialog(configureNTPView);
+				};
+
+                configureNTPController.Next += (sender, args) =>
                 {
                     setupNFSController.InitializeView();
                     controller.ShowDialog(setupNTPView);

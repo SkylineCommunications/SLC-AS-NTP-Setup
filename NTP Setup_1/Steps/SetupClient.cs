@@ -1,7 +1,5 @@
 ﻿namespace NTP_Setup_1.Steps
 {
-    using Skyline.DataMiner.CommunityLibrary.Linux;
-    using Skyline.DataMiner.CommunityLibrary.Linux.Actions.ActionSteps;
     using SLDataGateway.API.Collections.Linq;
     using System;
     using System.Collections.Generic;
