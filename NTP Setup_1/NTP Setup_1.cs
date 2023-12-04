@@ -10,13 +10,15 @@ namespace NTP_Setup_1
     using NTP_Setup_1.Steps;
     using NTP_Setup_1.Views;
     using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Net.Messages;
+	using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using Skyline.DataMiner.Utils.Linux;
+	using Skyline.DataMiner.Utils.SoftwareBundle;
 
-    /// <summary>
-    /// Represents a DataMiner Automation script.
-    /// </summary>
-    public class Script
+	/// <summary>
+	/// Represents a DataMiner Automation script.
+	/// </summary>
+	public class Script
 	{
         private InteractiveController controller;
 
@@ -36,7 +38,7 @@ namespace NTP_Setup_1
 
             try
             {
-                if (model.IsSilent)
+                if (model.IsSilent.GetValueOrDefault(false))
                 {
                     SilentSetup(engine, model);
                 }
@@ -123,30 +125,19 @@ namespace NTP_Setup_1
 
         private void SilentSetup(Engine engine, NTPSetupModel model)
         {
-            if (model.IsOffline)
-            {
-                engine.ExitFail("No network capability detected, this is required for NTP setup.");
-            }
+            ValidateInput(model);
 
             model.Linux = UtilityFunctions.ConnectToLinuxServer(model.Host, model.Username, model.Password);
+            model.InstallPackage = SoftwareBundles.GetUnZippedSoftwareBundle(model.PackageFolderPath);
 
-            var steps = new List<ILinuxAction>() { };
-
-            if ((bool)model.AsHost)
-            {
-                steps.Add(new SetupServer(model));
-            }
-            else
-            {
-                steps.Add(new SetupClient(model));
-            }
+            var steps = UtilityFunctions.GetInstallationSteps(engine, model);
 
             int numberOfSteps = steps.Count();
 
             int i = 1;
             bool installSucceeded = true;
 
-            foreach (var result in model.Linux.RunActions(steps))
+            foreach (var result in model.Linux.TryInstallNTP(steps))
             {
                 installSucceeded &= result.Succeeded;
                 engine.ShowProgress($"({i}/{numberOfSteps}) {result.Result}");
@@ -161,5 +152,34 @@ namespace NTP_Setup_1
 
             engine.ExitSuccess("Setup Completed.");
         }
+
+        private void ValidateInput(NTPSetupModel model)
+        {
+            foreach (var property in new string[] {model.Host, model.Username, model.Password})
+            {
+				if (string.IsNullOrEmpty(property))
+				{
+					throw new ArgumentNullException($"{nameof(property)} is required.");
+				}
+			}
+
+            foreach (var property in new bool?[] {model.AsHost, model.IsOffline, model.IsSilent })
+            {
+                if (property is null)
+                {
+					throw new ArgumentNullException($"{nameof(property)} is required.");
+				}
+            }
+
+            if (!model.AsHost.Value && string.IsNullOrEmpty(model.Server))
+            {
+				throw new ArgumentNullException($"Server is required when setting up an NTP client.");
+			}
+
+			if (model.IsOffline.Value && string.IsNullOrEmpty(model.PackageFolderPath))
+			{
+				throw new ArgumentNullException($"PackageFolderPath is required when setting up NTP while offline.");
+			}
+		}
     }
 }

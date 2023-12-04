@@ -32,8 +32,9 @@
             int row = 0;
             AddWidget(new Label("Choose Installation Mode:"), row++, 0);
             AddWidget(AsHostDropDown, row++, 0, 1, 3);
+            AddWidget(new Label("Select 'Client' to connect to an established NTP server or 'Server' to setup an NTP server."), row++, 0, 1, 3);
 
-            if (model.IsOffline)
+            if (model.IsOffline.Value)
             {
 				this.AddWidget(new Label("Select NTP package to install:"), row++, 0);
 				this.AddWidget(this.PackagesDropDown, row++, 0, 1, 4);

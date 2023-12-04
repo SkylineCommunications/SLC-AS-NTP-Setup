@@ -1,13 +1,12 @@
 ﻿namespace NTP_Setup_1.Steps
 {
     using SLDataGateway.API.Collections.Linq;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+    using Skyline.DataMiner.Utils.Linux;
+	using System.IO;
+	using Skyline.DataMiner.Utils.Linux.FileSystem;
+	using System.Linq;
 
-    public class SetupClient : ILinuxAction
+	public class SetupClient : IInstallerAction
     {
         private NTPSetupModel model;
 
@@ -16,12 +15,15 @@
             this.model = model;
         }
 
-        InstallationStepResult ILinuxAction.TryRunStep(ILinux linux)
+        InstallationStepResult IInstallerAction.TryRunStep(ILinux linux)
         {
             string command;
             string res;
 
-            if (model.IsOffline)
+			command = $"sudo timedatectl set-ntp off";
+			res = linux.Connection.RunCommand(command);
+
+			if (model.IsOffline.Value)
             {
                 OfflineSetup(linux);
             }
@@ -30,29 +32,47 @@
                 OnlineSetup(linux);
             }
 
-            command = $"sudo timedatectl set-ntp off";
-            res = linux.Connection.RunCommand(command);
-
             command = $@"echo ""server {model.Server} prefer iburst"" | sudo tee /etc/ntp.conf";
             res = linux.Connection.RunCommand(command);
 
             command = $"sudo systemctl restart ntp";
             res = linux.Connection.RunCommand(command);
 
-            return new InstallationStepResult(true, $"Successfully installed NTP as client.");
+			command = $"sudo systemctl enable ntp";
+			res = linux.Connection.RunCommand(command);
+
+			return new InstallationStepResult(true, $"Successfully installed NTP as client.");
         }
 
         private void OfflineSetup(ILinux linux)
         {
-            var filePath = "opensearch/ntp_4.2.8p15+dfsg-1ubuntu2_amd64.deb";
-            var command = $"sudo dpkg -i {filePath}";
-            var res = linux.Connection.RunCommand(command);
+            string destination = $"/home/{model.Username}/NTPSetup/";
+            linux.CreateDirectory(destination);
+
+            var unzippedPackage = model.InstallPackage;
+            var localPath = unzippedPackage.Path;
+
+            foreach (var file in Directory.EnumerateFiles(localPath))
+            {
+                if (file.EndsWith(".deb"))
+                {
+                    var fileNameStartIndex = file.LastIndexOf("\\")+1;
+                    var fileName = file.Substring(fileNameStartIndex);
+                    var destinationFile = linux.UploadFile(file, destination + fileName);
+                    linux.SoftwareBundleManager.Install(destinationFile.Path);
+                }
+            }
+
+            linux.Connection.RunCommand($"sudo rm -rf {destination}");
         }
 
         private void OnlineSetup(ILinux linux)
         {
-            var command = $"sudo apt-get install -y ntp";
-            var res = linux.Connection.RunCommand(command);
+			var command = $"sudo apt update";
+			var res = linux.Connection.RunCommand(command);
+
+			command = $"sudo apt-get install -y ntp";
+            res = linux.Connection.RunCommand(command);
         }
     }
 }

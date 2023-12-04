@@ -37,8 +37,16 @@
         public void Initialize()
         {
             configureNTPView.InitializeView(model);
-            
-            configureNTPView.NextButton.IsEnabled = false;
+
+			if (model.IsOffline.Value)
+			{
+				configureNTPView.NextButton.IsEnabled = false;
+				UpdateView();
+			}
+			else
+			{
+				configureNTPView.NextButton.IsEnabled = true;
+			}
         }
 
         public void EmptyView()
@@ -93,6 +101,7 @@
 				configureNTPView.NextButton.IsEnabled = false;
 			}
 		}
+
 		private void UpdateDropDown()
 		{
 			var dropdown = configureNTPView.PackagesDropDown;
@@ -139,7 +148,7 @@
 
 		private void OnNextButtonPressed(object sender, EventArgs e)
         {
-			if (model.IsOffline)
+			if (model.IsOffline.Value)
 			{
 				model.InstallPackage = packages[configureNTPView.PackagesDropDown.Selected];
 			}
@@ -148,6 +157,5 @@
 
             Next?.Invoke(this, EventArgs.Empty);
         }
-
     }
 }

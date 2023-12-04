@@ -68,24 +68,20 @@
                 // Network Check
                 try
                 {
-                    if (model.IsOffline)
-                    {
-						selectServerView.FeedbackConnection.Text += Environment.NewLine + "Network unavailable, proceeding with offline setup.";
-					}
-
                     var networkCheckResult = linux.Connection.RunCommand($"timeout 0.2 ping -c 1 8.8.8.8 >/dev/null 2>&1 ; echo $?");
-                    if (networkCheckResult == "0")
-                    {
-                        model.IsOffline = false;
-                        selectServerView.FeedbackConnection.Text += Environment.NewLine + "Network available, proceeding with setup.";
-                        selectServerView.NextButton.IsEnabled = true;
-                    }
-                    else
+                    if (networkCheckResult != "0" || model.IsOffline.Value)
                     {
                         model.IsOffline = true;
                         selectServerView.FeedbackConnection.Text += Environment.NewLine + "Network unavailable, proceeding with offline setup.";
                     }
-                }
+					else
+					{
+						model.IsOffline = false;
+						selectServerView.FeedbackConnection.Text += Environment.NewLine + "Network available, proceeding with setup.";
+					}
+					
+                    selectServerView.NextButton.IsEnabled = true;
+				}
                 catch (Exception ex)
                 {
                     selectServerView.FeedbackConnection.Text = ex.ToString();

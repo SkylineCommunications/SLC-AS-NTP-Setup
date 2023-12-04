@@ -44,15 +44,20 @@
         /// <summary>
         /// Gets or sets a value indicating whether the server has network capability.
         /// </summary>
-        public bool IsOffline { get; set; }
+        public bool? IsOffline { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to carry out silent setup.
         /// </summary>
-        public bool IsSilent { get; set; }
+        public bool? IsSilent { get; set; }
 
 		/// <summary>
-		/// Gets or sets the file path of the install package.
+		/// Gets or sets the folder path of the install package.
+		/// </summary>
+		public string PackageFolderPath { get; set; }
+
+		/// <summary>
+		/// Gets or sets the UnZippedSoftwareBundle object of the install package.
 		/// </summary>
 		public IUnZippedSoftwareBundle InstallPackage { get; set; }
 	}

@@ -15,18 +15,16 @@
             Server = new TextBox();
             Server.Width = TextBoxWidth;
 
-            Feedback = new TextBox();
-            Feedback.Width = 335;
-            Feedback.Height = 200;
+            Feedback = new Label("Fill in the NTP server in the field above and press the setup button.");
 
             NextButton = new Button("Next");
-            SetupNTPClientButton = new Button("Setup NTP Client");
-            SetupNTPServerButton = new Button("Setup NTP Server");
+            SetupNTPClientButton = new Button("Setup NTP");
+            SetupNTPServerButton = new Button("Setup NTP");
         }
 
         public TextBox Server { get; set; }
 
-        public TextBox Feedback { get; set; }
+        public Label Feedback { get; set; }
 
         public Button SetupNTPClientButton { get; set; }
 
@@ -41,7 +39,6 @@
             AddWidget(Server, row++, 0, 1, 3);
 
             AddWidget(Feedback, row++, 0, 1, 3);
-            this.Feedback.Text = "Fill in the NTP server in the field above and press the setup button.";
 
             AddWidget(SetupNTPClientButton, row++, 2, 1, 1);
             AddWidget(NextButton, row++, 2, 1, 1);

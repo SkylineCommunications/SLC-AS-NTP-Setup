@@ -9,6 +9,7 @@
     using Renci.SshNet;
     using Renci.SshNet.Common;
     using Skyline.DataMiner.Automation;
+    using Skyline.DataMiner.Utils.Linux;
     using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
     public class SetupNTPController
@@ -33,7 +34,7 @@
 
         public void InitializeView()
         {
-            switch (model.AsHost)
+            switch (model.AsHost.Value)
             {
                 default:
                 case true:
@@ -54,21 +55,25 @@
 
         private void OnSetupNTPClientButtonPressed(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(setupNTPView.Server.Text))
+            {
+                setupNTPView.Feedback.Text = "Server field is required.";
+                return;
+            }
+
             try
             {
                 setupNTPView.Feedback.Text = string.Empty;
-
-                var steps = new List<ILinuxAction>();
                 model.Server = setupNTPView.Server.Text;
 
-                steps.Add(new SetupClient(model));
+                var steps = UtilityFunctions.GetInstallationSteps(Engine, model);
 
                 int numberOfSteps = steps.Count();
 
                 int i = 1;
                 bool installSucceeded = true;
 
-                foreach (var result in model.Linux.RunActions(steps))
+                foreach (var result in model.Linux.TryInstallNTP(steps))
                 {
                     setupNTPView.StartInstalling();
                     installSucceeded &= result.Succeeded;
@@ -94,29 +99,27 @@
             {
                 setupNTPView.Feedback.Text = string.Empty;
 
-                var steps = new List<ILinuxAction>();
+				var steps = UtilityFunctions.GetInstallationSteps(Engine, model);
 
-                steps.Add(new SetupServer(model));
+				int numberOfSteps = steps.Count();
 
-                int numberOfSteps = steps.Count();
+				int i = 1;
+				bool installSucceeded = true;
 
-                int i = 1;
-                bool installSucceeded = true;
+				foreach (var result in model.Linux.TryInstallNTP(steps))
+				{
+					setupNTPView.StartInstalling();
+					installSucceeded &= result.Succeeded;
+					setupNTPView.AddInstallationFeedback($"({i}/{numberOfSteps}) {result.Result}");
+					i++;
+					if (result.Succeeded != true)
+					{
+						break;
+					}
+				}
 
-                foreach (var result in model.Linux.RunActions(steps))
-                {
-                    setupNTPView.StartInstalling();
-                    installSucceeded &= result.Succeeded;
-                    setupNTPView.AddInstallationFeedback($"({i}/{numberOfSteps}) {result.Result}");
-                    i++;
-                    if (result.Succeeded != true)
-                    {
-                        break;
-                    }
-                }
-
-                setupNTPView.SetInstallationResult(installSucceeded);
-            }
+				setupNTPView.SetInstallationResult(installSucceeded);
+			}
             catch
             {
                 throw new Exception();
