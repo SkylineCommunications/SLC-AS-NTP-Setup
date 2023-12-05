@@ -1,39 +1,40 @@
 ﻿namespace NTP_Setup_1.Steps
 {
-    using Skyline.DataMiner.Utils.Linux;
-    using System;
+	using System;
 	using System.IO;
 
-    public class SetupServer : IInstallerAction
-    {
-        private NTPSetupModel model;
+	using Skyline.DataMiner.Utils.Linux;
 
-        public SetupServer(NTPSetupModel model)
-        {
-            this.model = model;
-        }
+	public class SetupServer : IInstallerAction
+	{
+		private NTPSetupModel model;
 
-        InstallationStepResult IInstallerAction.TryRunStep(ILinux linux)
-        {
-            try
-            {
-                string command;
-                string res;
+		public SetupServer(NTPSetupModel model)
+		{
+			this.model = model;
+		}
+
+		InstallationStepResult IInstallerAction.TryRunStep(ILinux linux)
+		{
+			try
+			{
+				string command;
+				string res;
 
 				command = $"sudo timedatectl set-ntp off";
 				res = linux.Connection.RunCommand(command);
 
-				if (model.IsOffline.Value)
-                {
-                    OfflineSetup(linux);
-                }
-                else
-                {
-                    OnlineSetup(linux);
-                }
+				if (model.IsOnline.Value)
+				{
+					OnlineSetup(linux);
+				}
+				else
+				{
+					OfflineSetup(linux);
+				}
 
-                command = $"sudo ufw allow ntp";
-                res = linux.Connection.RunCommand(command);
+				command = $"sudo ufw allow ntp";
+				res = linux.Connection.RunCommand(command);
 
 				command = $"sudo systemctl restart ntp";
 				res = linux.Connection.RunCommand(command);
@@ -42,12 +43,12 @@
 				res = linux.Connection.RunCommand(command);
 
 				return new InstallationStepResult(true, $"Successfully installed NTP as host.");
-            }
-            catch (Exception e)
-            {
-                return new InstallationStepResult(false, $"Failed to setup NTP.{Environment.NewLine}{e}");
-            }
-        }
+			}
+			catch (Exception e)
+			{
+				return new InstallationStepResult(false, $"Failed to setup NTP.{Environment.NewLine}{e}");
+			}
+		}
 
 		private void OfflineSetup(ILinux linux)
 		{
@@ -72,12 +73,12 @@
 		}
 
 		private void OnlineSetup(ILinux linux)
-        {
+		{
 			var command = $"sudo apt update";
 			var res = linux.Connection.RunCommand(command);
 
 			command = $"sudo apt-get install -y ntp";
 			res = linux.Connection.RunCommand(command);
 		}
-    }
+	}
 }

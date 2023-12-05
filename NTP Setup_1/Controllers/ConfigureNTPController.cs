@@ -1,63 +1,60 @@
 ﻿namespace NTP_Setup_1.Controllers
 {
-    using System;
-    using System.Collections.Generic;
+	using System;
+	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
-    using System.Net.Sockets;
-    using NTP_Setup_1.Steps;
-    using NTP_Setup_1.Views;
-	using Renci.SshNet;
-    using Renci.SshNet.Common;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+
+	using NTP_Setup_1.Views;
+
+	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.SoftwareBundle;
 
-    public class ConfigureNTPController
-    {
-        private readonly ConfigureNTPView configureNTPView;
-        private readonly NTPSetupModel model;
+	public class ConfigureNTPController
+	{
+		private readonly ConfigureNTPView configureNTPView;
+		private readonly NTPSetupModel model;
 		private readonly string folderPath = @"C:\Skyline DataMiner\Documents\DMA_COMMON_DOCUMENTS\InstallPackages";
 		private Dictionary<string, IUnZippedSoftwareBundle> packages;
 
 		public ConfigureNTPController(Engine engine, ConfigureNTPView view, NTPSetupModel model)
-        {
-            configureNTPView = view;
-            this.model = model;
-            Engine = engine;
+		{
+			configureNTPView = view;
+			this.model = model;
+			Engine = engine;
 
-            view.ManagePackagesButton.Pressed += OnManagePackagesButtonPressed;
-            view.NextButton.Pressed += OnNextButtonPressed;
-        }
+			view.ManagePackagesButton.Pressed += OnManagePackagesButtonPressed;
+			view.NextButton.Pressed += OnNextButtonPressed;
+		}
 
-        public event EventHandler<EventArgs> Next;
+		public event EventHandler<EventArgs> Next;
 
-        public Engine Engine { get; set; }
+		public Engine Engine { get; set; }
 
-        public void Initialize()
-        {
-            configureNTPView.InitializeView(model);
+		public void Initialize()
+		{
+			configureNTPView.InitializeView(model);
 
-			if (model.IsOffline.Value)
-			{
-				configureNTPView.NextButton.IsEnabled = false;
-				UpdateView();
-			}
-			else
+			if (model.IsOnline.Value)
 			{
 				configureNTPView.NextButton.IsEnabled = true;
 			}
-        }
+			else
+			{
+				configureNTPView.NextButton.IsEnabled = false;
+				UpdateView();
+			}			
+		}
 
-        public void EmptyView()
-        {
+		public void EmptyView()
+		{
 			configureNTPView.Clear();
-        }
+		}
 
-        private void OnManagePackagesButtonPressed(object sender, EventArgs e)
-        {
-            try
-            {
+		private void OnManagePackagesButtonPressed(object sender, EventArgs e)
+		{
+			try
+			{
 				// Call subscript
 				// Prepare a subscript
 				SubScriptOptions subScript = Engine.PrepareSubScript("ManageInstallPackages");
@@ -82,11 +79,11 @@
 				// Refresh the dropdown list
 				UpdateView();
 			}
-            catch
-            {
-                throw new Exception();
-            }
-        }
+			catch
+			{
+				throw new Exception();
+			}
+		}
 
 		private void UpdateView()
 		{
@@ -147,15 +144,15 @@
 		}
 
 		private void OnNextButtonPressed(object sender, EventArgs e)
-        {
-			if (model.IsOffline.Value)
+		{
+			if (!model.IsOnline.Value)
 			{
 				model.InstallPackage = packages[configureNTPView.PackagesDropDown.Selected];
 			}
 
-			model.AsHost = configureNTPView.AsHostDropDown.Selected == "Client"? false : true;
+			model.AsServer = configureNTPView.AsServerDropDown.Selected == "Client" ? false : true;
 
-            Next?.Invoke(this, EventArgs.Empty);
-        }
-    }
+			Next?.Invoke(this, EventArgs.Empty);
+		}
+	}
 }

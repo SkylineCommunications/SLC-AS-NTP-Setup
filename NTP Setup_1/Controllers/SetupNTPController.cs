@@ -1,103 +1,66 @@
 ﻿namespace NTP_Setup_1.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Net.Sockets;
-    using NTP_Setup_1.Steps;
-    using NTP_Setup_1.Views;
-    using Renci.SshNet;
-    using Renci.SshNet.Common;
-    using Skyline.DataMiner.Automation;
-    using Skyline.DataMiner.Utils.Linux;
-    using Skyline.DataMiner.Utils.InteractiveAutomationScript;
+	using System;
+	using System.Linq;
 
-    public class SetupNTPController
-    {
-        private readonly SetupNTPView setupNTPView;
-        private readonly NTPSetupModel model;
+	using NTP_Setup_1.Views;
 
-        public SetupNTPController(Engine engine, SetupNTPView view, NTPSetupModel model)
-        {
-            setupNTPView = view;
-            this.model = model;
-            Engine = engine;
+	using Skyline.DataMiner.Automation;
 
-            view.SetupNTPClientButton.Pressed += OnSetupNTPClientButtonPressed;
-            view.SetupNTPServerButton.Pressed += OnSetupNTPServerButtonPressed;
-            view.NextButton.Pressed += OnNextButtonPressed;
-        }
+	public class SetupNTPController
+	{
+		private readonly SetupNTPView setupNTPView;
+		private readonly NTPSetupModel model;
 
-        public event EventHandler<EventArgs> Next;
+		public SetupNTPController(Engine engine, SetupNTPView view, NTPSetupModel model)
+		{
+			setupNTPView = view;
+			this.model = model;
+			Engine = engine;
 
-        public Engine Engine { get; set; }
+			view.SetupNTPClientButton.Pressed += OnSetupNTPClientButtonPressed;
+			view.SetupNTPServerButton.Pressed += OnSetupNTPServerButtonPressed;
+			view.NextButton.Pressed += OnNextButtonPressed;
+		}
 
-        public void InitializeView()
-        {
-            switch (model.AsHost.Value)
-            {
-                default:
-                case true:
-                    setupNTPView.InitializeServerSetup();
-                    break;
-                case false:
-                    setupNTPView.InitializeClientSetup();
-                    break;
-            }
-            
-            setupNTPView.NextButton.IsEnabled = false;
-        }
+		public event EventHandler<EventArgs> Next;
 
-        public void EmptyView()
-        {
-            setupNTPView.Clear();
-        }
+		public Engine Engine { get; set; }
 
-        private void OnSetupNTPClientButtonPressed(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(setupNTPView.Server.Text))
-            {
-                setupNTPView.Feedback.Text = "Server field is required.";
-                return;
-            }
+		public void InitializeView()
+		{
+			switch (model.AsServer.Value)
+			{
+				default:
+				case true:
+					setupNTPView.InitializeServerSetup();
+					break;
 
-            try
-            {
-                setupNTPView.Feedback.Text = string.Empty;
-                model.Server = setupNTPView.Server.Text;
+				case false:
+					setupNTPView.InitializeClientSetup();
+					break;
+			}
 
-                var steps = UtilityFunctions.GetInstallationSteps(Engine, model);
+			setupNTPView.NextButton.IsEnabled = false;
+		}
 
-                int numberOfSteps = steps.Count();
+		public void EmptyView()
+		{
+			setupNTPView.Clear();
+		}
 
-                int i = 1;
-                bool installSucceeded = true;
+		private void OnSetupNTPClientButtonPressed(object sender, EventArgs e)
+		{
+			if (string.IsNullOrEmpty(setupNTPView.Server.Text))
+			{
+				setupNTPView.Feedback.Text = "Server field is required.";
+				return;
+			}
 
-                foreach (var result in model.Linux.TryInstallNTP(steps))
-                {
-                    setupNTPView.StartInstalling();
-                    installSucceeded &= result.Succeeded;
-                    setupNTPView.AddInstallationFeedback($"({i}/{numberOfSteps}) {result.Result}");
-                    i++;
-                    if (result.Succeeded != true)
-                    {
-                        break;
-                    }
-                }
-
-                setupNTPView.SetInstallationResult(installSucceeded);
-            }
-            catch
-            {
-                throw new Exception();
-            }
-        }
-
-        private void OnSetupNTPServerButtonPressed(object sender, EventArgs e)
-        {
-            try
-            {
-                setupNTPView.Feedback.Text = string.Empty;
+			try
+			{
+				setupNTPView.Feedback.Text = string.Empty;
+				model.Server = setupNTPView.Server.Text;
 
 				var steps = UtilityFunctions.GetInstallationSteps(Engine, model);
 
@@ -120,15 +83,48 @@
 
 				setupNTPView.SetInstallationResult(installSucceeded);
 			}
-            catch
-            {
-                throw new Exception();
-            }
-        }
+			catch
+			{
+				throw new Exception();
+			}
+		}
 
-        private void OnNextButtonPressed(object sender, EventArgs e)
-        {
-            Next?.Invoke(this, EventArgs.Empty);
-        }
-    }
+		private void OnSetupNTPServerButtonPressed(object sender, EventArgs e)
+		{
+			try
+			{
+				setupNTPView.Feedback.Text = string.Empty;
+
+				var steps = UtilityFunctions.GetInstallationSteps(Engine, model);
+
+				int numberOfSteps = steps.Count();
+
+				int i = 1;
+				bool installSucceeded = true;
+
+				foreach (var result in model.Linux.TryInstallNTP(steps))
+				{
+					setupNTPView.StartInstalling();
+					installSucceeded &= result.Succeeded;
+					setupNTPView.AddInstallationFeedback($"({i}/{numberOfSteps}) {result.Result}");
+					i++;
+					if (result.Succeeded != true)
+					{
+						break;
+					}
+				}
+
+				setupNTPView.SetInstallationResult(installSucceeded);
+			}
+			catch
+			{
+				throw new Exception();
+			}
+		}
+
+		private void OnNextButtonPressed(object sender, EventArgs e)
+		{
+			Next?.Invoke(this, EventArgs.Empty);
+		}
+	}
 }

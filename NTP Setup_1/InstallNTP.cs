@@ -1,6 +1,7 @@
 ﻿namespace NTP_Setup_1
 {
 	using System.Collections.Generic;
+
 	using Skyline.DataMiner.Utils.Linux;
 
 	public static class InstallNTP
