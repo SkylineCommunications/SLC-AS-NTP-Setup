@@ -5,11 +5,11 @@
 
 	using Skyline.DataMiner.Utils.Linux;
 
-	public class SetupServer : IInstallerAction
+	public class SetupNTP : IInstallerAction
 	{
 		private NTPSetupModel model;
 
-		public SetupServer(NTPSetupModel model)
+		public SetupNTP(NTPSetupModel model)
 		{
 			this.model = model;
 		}
@@ -18,12 +18,6 @@
 		{
 			try
 			{
-				string command;
-				string res;
-
-				command = $"sudo timedatectl set-ntp off";
-				res = linux.Connection.RunCommand(command);
-
 				if (model.IsOnline.Value)
 				{
 					OnlineSetup(linux);
@@ -33,16 +27,7 @@
 					OfflineSetup(linux);
 				}
 
-				command = $"sudo ufw allow ntp";
-				res = linux.Connection.RunCommand(command);
-
-				command = $"sudo systemctl restart ntp";
-				res = linux.Connection.RunCommand(command);
-
-				command = $"sudo systemctl enable ntp";
-				res = linux.Connection.RunCommand(command);
-
-				return new InstallationStepResult(true, $"Successfully installed NTP as host.");
+				return new InstallationStepResult(true, $"Successfully installed NTP.");
 			}
 			catch (Exception e)
 			{

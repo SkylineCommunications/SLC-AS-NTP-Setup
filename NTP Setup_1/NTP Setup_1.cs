@@ -122,6 +122,8 @@ namespace NTP_Setup_1
 
 		private void SilentSetup(Engine engine, NTPSetupModel model)
 		{
+			var progressMsg = new string[] { }.ToList();
+
 			ValidateInput(model);
 
 			model.Linux = UtilityFunctions.ConnectToLinuxServer(model.Host, model.Username, model.Password);
@@ -158,7 +160,8 @@ namespace NTP_Setup_1
 			foreach (var result in model.Linux.TryInstallNTP(steps))
 			{
 				installSucceeded &= result.Succeeded;
-				engine.ShowProgress($"({i}/{numberOfSteps}) {result.Result}");
+				progressMsg.Add($"({i}/{numberOfSteps}) {result.Result}");
+				engine.ShowProgress(string.Join(Environment.NewLine, progressMsg));
 				engine.GenerateInformation($"{result.Result}");
 				i++;
 				if (result.Succeeded != true)

@@ -150,7 +150,7 @@
 				model.InstallPackage = packages[configureNTPView.PackagesDropDown.Selected];
 			}
 
-			model.AsServer = configureNTPView.AsServerDropDown.Selected == "Client" ? false : true;
+			model.AsServer = configureNTPView.AsServerDropDown.Selected == "Server" ? true : false;
 
 			Next?.Invoke(this, EventArgs.Empty);
 		}

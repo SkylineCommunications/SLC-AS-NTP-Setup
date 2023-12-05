@@ -36,28 +36,26 @@
 
 		internal static IEnumerable<IInstallerAction> GetInstallationSteps(Engine engine, NTPSetupModel model)
 		{
-			List<IInstallerAction> steps = new List<IInstallerAction>();
-
-			steps.AddRange(DownloadAndInstallSteps(model));
-
-			return steps;
-		}
-
-		internal static IEnumerable<IInstallerAction> DownloadAndInstallSteps(NTPSetupModel model)
-		{
-			List<IInstallerAction> steps = new List<IInstallerAction>();
+			List<IInstallerAction> steps = new List<IInstallerAction>()
+			{
+				new DisableTimeDateCtl(),
+				new SetupNTP(model),
+			};
 
 			switch (model.AsServer.Value)
 			{
 				default:
 				case true:
-					steps.Add(new SetupServer(model));
+					steps.Add(new AllowFirewall());
 					break;
 
 				case false:
-					steps.Add(new SetupClient(model));
+					steps.Add(new ConfigureClientNTP(model));
 					break;
 			}
+
+			steps.Add(new RestartNTPService());
+			steps.Add(new EnableNTPService());
 
 			return steps;
 		}

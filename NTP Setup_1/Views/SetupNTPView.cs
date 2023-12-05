@@ -1,13 +1,17 @@
 ﻿namespace NTP_Setup_1.Views
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Linq;
 
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Utils.InteractiveAutomationScript;
 
 	public class SetupNTPView : Dialog
 	{
-		private const int TextBoxWidth = 190;
+		private const int TextBoxWidth = 320;
+		private const int TextBoxHeight = 150;
+		private List<string> InstallationFeedback = new string[] { }.ToList();
 
 		public SetupNTPView(Engine engine) : base(engine)
 		{
@@ -15,7 +19,7 @@
 			Server = new TextBox();
 			Server.Width = TextBoxWidth;
 
-			Feedback = new Label("Fill in the NTP server in the field above and press the setup button.");
+			Feedback = GetTextBox("Fill in the NTP server in the field above and press the setup button.");
 
 			NextButton = new Button("Next");
 			SetupNTPClientButton = new Button("Setup NTP");
@@ -24,7 +28,7 @@
 
 		public TextBox Server { get; set; }
 
-		public Label Feedback { get; set; }
+		public TextBox Feedback { get; set; }
 
 		public Button SetupNTPClientButton { get; set; }
 
@@ -71,18 +75,22 @@
 		public void StartInstalling()
 		{
 			NextButton.IsEnabled = false;
+			SetupNTPClientButton.IsEnabled = false;
+			SetupNTPServerButton.IsEnabled = false;
 		}
 
 		public void AddInstallationFeedback(string feedback)
 		{
-			Feedback.Text += feedback + Environment.NewLine;
+			InstallationFeedback.Add(feedback);
+			Feedback.Text = string.Join(Environment.NewLine, InstallationFeedback);
+			this.Show(false);
 		}
 
 		public void SetInstallationResult(bool succeeded)
 		{
 			if (succeeded)
 			{
-				Feedback.Text += "Setup succeeded.";
+				AddInstallationFeedback("Setup succeeded.");
 				SetupNTPClientButton.IsEnabled = false;
 				SetupNTPServerButton.IsEnabled = false;
 				NextButton.IsEnabled = true;
@@ -91,6 +99,15 @@
 			{
 				Feedback.Text += "Setup failed.";
 			}
+		}
+
+		private static TextBox GetTextBox(string text, int width = TextBoxWidth, int height = TextBoxHeight, bool multiline = true)
+		{
+			var textbox = new TextBox(text);
+			textbox.IsMultiline = multiline;
+			textbox.Width = width;
+			textbox.Height = height;
+			return textbox;
 		}
 	}
 }
