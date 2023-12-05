@@ -81,7 +81,15 @@
 
 		public void AddInstallationFeedback(string feedback)
 		{
+			InstallationFeedback.RemoveAt(InstallationFeedback.Count - 1);
 			InstallationFeedback.Add(feedback);
+			Feedback.Text = string.Join(Environment.NewLine, InstallationFeedback);
+			this.Show(false);
+		}
+
+		public void AddInstallationStep(string description)
+		{
+			InstallationFeedback.Add(description);
 			Feedback.Text = string.Join(Environment.NewLine, InstallationFeedback);
 			this.Show(false);
 		}
@@ -90,7 +98,7 @@
 		{
 			if (succeeded)
 			{
-				AddInstallationFeedback("Setup succeeded.");
+				AddInstallationStep("Setup succeeded.");
 				SetupNTPClientButton.IsEnabled = false;
 				SetupNTPServerButton.IsEnabled = false;
 				NextButton.IsEnabled = true;

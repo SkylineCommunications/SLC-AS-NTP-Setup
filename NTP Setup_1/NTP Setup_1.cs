@@ -157,9 +157,13 @@ namespace NTP_Setup_1
 			int i = 1;
 			bool installSucceeded = true;
 
-			foreach (var result in model.Linux.TryInstallNTP(steps))
+			foreach (var step in steps)
 			{
+				progressMsg.Add($"({i}/{numberOfSteps}) {step.Description}");
+				engine.ShowProgress(string.Join(Environment.NewLine, progressMsg));
+				var result = step.TryRunStep(model.Linux);
 				installSucceeded &= result.Succeeded;
+				progressMsg.RemoveAt(progressMsg.Count - 1);
 				progressMsg.Add($"({i}/{numberOfSteps}) {result.Result}");
 				engine.ShowProgress(string.Join(Environment.NewLine, progressMsg));
 				engine.GenerateInformation($"{result.Result}");

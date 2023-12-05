@@ -7,6 +7,9 @@
 
 	public class DisableTimeDateCtl : IInstallerAction
 	{
+		private string description = "Setting timedatectl NTP to off...";
+
+		public string Description { get { return description; } }
 		InstallationStepResult IInstallerAction.TryRunStep(ILinux linux)
 		{
 			try

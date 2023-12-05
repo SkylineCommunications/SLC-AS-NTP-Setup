@@ -102,9 +102,12 @@
 				int i = 1;
 				bool installSucceeded = true;
 
-				foreach (var result in model.Linux.TryInstallNTP(steps))
+				setupNTPView.StartInstalling();
+
+				foreach (var step in steps)
 				{
-					setupNTPView.StartInstalling();
+					setupNTPView.AddInstallationStep(step.Description);
+					var result = step.TryRunStep(model.Linux);
 					installSucceeded &= result.Succeeded;
 					setupNTPView.AddInstallationFeedback($"({i}/{numberOfSteps}) {result.Result}");
 					i++;

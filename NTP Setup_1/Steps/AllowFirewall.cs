@@ -7,6 +7,9 @@
 
 	public class AllowFirewall : IInstallerAction
 	{
+		private string description = "Allowing NTP through firewall...";
+
+		public string Description { get { return description; } }
 		InstallationStepResult IInstallerAction.TryRunStep(ILinux linux)
 		{
 			try

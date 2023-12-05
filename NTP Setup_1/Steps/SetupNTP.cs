@@ -9,10 +9,14 @@
 	{
 		private NTPSetupModel model;
 
+		private string description = "Installing NTP...";
+
 		public SetupNTP(NTPSetupModel model)
 		{
 			this.model = model;
 		}
+
+		public string Description { get { return description; } }
 
 		InstallationStepResult IInstallerAction.TryRunStep(ILinux linux)
 		{

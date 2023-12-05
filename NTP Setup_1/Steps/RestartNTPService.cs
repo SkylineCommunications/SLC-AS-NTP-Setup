@@ -7,6 +7,9 @@
 
 	public class RestartNTPService : IInstallerAction
 	{
+		private string description = "Restarting NTP service...";
+
+		public string Description { get { return description; } }
 		InstallationStepResult IInstallerAction.TryRunStep(ILinux linux)
 		{
 			try

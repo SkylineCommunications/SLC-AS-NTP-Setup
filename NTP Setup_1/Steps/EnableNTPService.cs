@@ -7,6 +7,10 @@
 
 	public class EnableNTPService : IInstallerAction
 	{
+		private string description = "Emabling NTP service...";
+
+		public string Description { get { return description; } }
+
 		InstallationStepResult IInstallerAction.TryRunStep(ILinux linux)
 		{
 			try

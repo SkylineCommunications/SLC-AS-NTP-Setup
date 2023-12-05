@@ -8,11 +8,15 @@
 	public class ConfigureClientNTP : IInstallerAction
 	{
 		private NTPSetupModel model;
+		private string description = "Configuring client NTP settings...";
+
 
 		public ConfigureClientNTP(NTPSetupModel model)
 		{
 			this.model = model;
 		}
+
+		public string Description { get { return description; } }
 
 		InstallationStepResult IInstallerAction.TryRunStep(ILinux linux)
 		{
