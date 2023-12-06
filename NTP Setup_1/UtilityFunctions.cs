@@ -29,9 +29,12 @@
 
 		public static bool NetworkCheck(NTPSetupModel model)
 		{
-			var networkCheckResult = model.Linux.Connection.RunCommand($"timeout 0.2 ping -c 1 8.8.8.8 >/dev/null 2>&1 ; echo $?");
+			//var networkCheckResult = model.Linux.Connection.RunCommand($"timeout 0.2 ping -c 1 8.8.8.8 >/dev/null 2>&1 ; echo $?");
 			// "0" -> online
-			return networkCheckResult == "0"? true: false;
+			//return networkCheckResult == "0" ? true : false;
+			
+			var networkCheckResult = model.Linux.Connection.RunCommand("curl -v google.com").Contains("Connected to google.com");
+			return networkCheckResult;
 		}
 
 		internal static IEnumerable<IInstallerAction> GetInstallationSteps(Engine engine, NTPSetupModel model)

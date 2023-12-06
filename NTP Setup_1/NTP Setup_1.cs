@@ -7,6 +7,7 @@ namespace NTP_Setup_1
 
 	using NTP_Setup_1.Controllers;
 	using NTP_Setup_1.Views;
+	using Renci.SshNet.Messages;
 
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.Messages;
@@ -103,6 +104,7 @@ namespace NTP_Setup_1
 				engine.GenerateInformation("ERR| Unable to show error message window: " + ex_two);
 			}
 
+			engine.ExitFail(message);
 			engine.GenerateInformation(message);
 		}
 
@@ -118,6 +120,7 @@ namespace NTP_Setup_1
 				engine.GenerateInformation("ERR| Unable to show error message window: " + ex_two);
 			}
 
+			engine.ExitFail(message);
 			engine.GenerateInformation(message);
 		}
 
