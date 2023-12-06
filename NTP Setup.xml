@@ -3,7 +3,7 @@
 	<Name>NTP Setup</Name>
 	<Description></Description>
 	<Type>Automation</Type>
-	<Author>JCL</Author>
+	<Author>JLW</Author>
 	<CheckSets>FALSE</CheckSets>
 	<Folder>Tools</Folder>
 

@@ -27,8 +27,6 @@ namespace NTP_Setup_1
 		public void Run(Engine engine)
 		{
 			// engine.ShowUI();
-			engine.FindInteractiveClient("Launching NTP Script", 100, "user:" + engine.UserLoginName, AutomationScriptAttachOptions.AttachImmediately);
-			controller = new InteractiveController(engine);
 			engine.Timeout = new TimeSpan(1, 0, 0);
 
 			string input = engine.GetScriptParam("Input").Value;
@@ -40,6 +38,9 @@ namespace NTP_Setup_1
 				{
 					SilentSetup(engine, model);
 				}
+
+				engine.FindInteractiveClient("Launching NTP Script", 100, "user:" + engine.UserLoginName, AutomationScriptAttachOptions.AttachImmediately);
+				controller = new InteractiveController(engine);
 
 				SelectServerView selectServerView = new SelectServerView(engine);
 				SelectServerController selectServerController = new SelectServerController(engine, selectServerView, model);
@@ -159,22 +160,24 @@ namespace NTP_Setup_1
 
 			foreach (var step in steps)
 			{
-				progressMsg.Add($"({i}/{numberOfSteps}) {step.Description}");
-				engine.ShowProgress(string.Join(Environment.NewLine, progressMsg));
+				//progressMsg.Add($"({i}/{numberOfSteps}) {step.Description}");
+				//engine.ShowProgress(string.Join(Environment.NewLine, progressMsg));
 				var result = step.TryRunStep(model.Linux);
 				installSucceeded &= result.Succeeded;
-				progressMsg.RemoveAt(progressMsg.Count - 1);
-				progressMsg.Add($"({i}/{numberOfSteps}) {result.Result}");
-				engine.ShowProgress(string.Join(Environment.NewLine, progressMsg));
+				//progressMsg.RemoveAt(progressMsg.Count - 1);
+				//progressMsg.Add($"({i}/{numberOfSteps}) {result.Result}");
+				//engine.ShowProgress(string.Join(Environment.NewLine, progressMsg));
 				engine.GenerateInformation($"{result.Result}");
 				i++;
 				if (result.Succeeded != true)
 				{
+					engine.GenerateInformation("NTP Setup failed.");
 					engine.ExitFail("Setup failed.");
 					break;
 				}
 			}
 
+			engine.GenerateInformation("NTP Setup completed.");
 			engine.ExitSuccess("Setup Completed.");
 		}
 
