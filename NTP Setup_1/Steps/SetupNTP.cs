@@ -41,7 +41,7 @@
 
 		private void OfflineSetup(ILinux linux)
 		{
-			string destination = $"/home/{model.Username}/NTPSetup/";
+			string destination = model.Username == "root"? "/root/NTPSetup" : $"/home/{model.Username}/NTPSetup/";
 			linux.CreateDirectory(destination);
 
 			var unzippedPackage = model.InstallPackage;
